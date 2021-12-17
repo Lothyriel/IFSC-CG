@@ -6,6 +6,7 @@ class Canvas {
         this.render = render;
         this.entities = {};
         this.keys = {};
+        this.up = new THREE.Vector3(1, 0, 0);
     }
     draw() {
         this.render.render(this.scene, this.camera);
@@ -18,14 +19,12 @@ class Canvas {
 }
 
 class Car {
-    constructor(maxSpeed, curvePoints) {
+    constructor(maxSpeed, curve, step) {
         this.maxSpeed = maxSpeed;
-        this.curvePoints = curvePoints;
-        this.currentPointIndex = 0
+        this.curve = curve;
+        this.counter = 0
         this.cube = this.createCube();
-        this.up = new THREE.Vector3(0, 0, 1);
-        this.tangent = new THREE.Vector3();
-        this.axis = new THREE.Vector3();
+        this.step = step;
     }
     createCube() {
         let cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
@@ -36,34 +35,35 @@ class Car {
         return cube;
     }
     draw() {
-        let point = this.curvePoints[this.currentPointIndex];
+        console.log(this.counter +" "+  this.cube.position.x + " " + this.cube.position.y);
+        let point = this.curve.getPointAt(this.counter);
         this.cube.position.set(point.x, point.y, 0);
-
         this.adjustAngle()
     }
     adjustAngle() {
-        let curve = canvas.entities.curve;
-        //let tangentPoint = curve.getTangentAt(this.currentPointIndex/this.curvePoints.length);
-        //this.cube.rotation.set(tangentPoint.x, tangentPoint.y, 0);
-            ////////////
-        let point = this.curvePoints[this.currentPointIndex];
-        console.log(point)
-        this.cube.lookAt(new THREE.Vector3(point.x, point.y, 0));
+        let tangent = this.curve.getTangentAt(this.counter).normalize();
+        tangent = new THREE.Vector3(tangent.x, tangent.y, 0);
+
+        let axis = new THREE.Vector3(); 
+        axis.crossVectors(canvas.up, tangent).normalize();
+
+        let radians = Math.acos(canvas.up.dot(tangent));
+
+        this.cube.quaternion.setFromAxisAngle(axis, radians);
     }
-    move(direction) {
-        this.currentPointIndex += direction;
+    move(step) {
+        this.counter += step;
     }
     moveLeft() {
-        if (this.currentPointIndex == 0)
+        if (this.counter - this.step < 0)
             return;
 
-        this.move(-1);
+        this.move(-this.step);
     }
     moveRight() {
-        if (this.currentPointIndex == this.curvePoints.length - 1)
+        if (this.counter + this.step > 1)
             return;
-
-        this.move(1);
+        this.move(this.step);
     }
 }
 
@@ -80,7 +80,6 @@ function createCurve(precision) {
     ];
     let curve = new THREE.SplineCurve(originalPoints);
     let points = curve.getPoints(precision);
-    curve.allPoints = points;
 
     let lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
     let line = new THREE.Line(lineGeometry, lineMaterial);
@@ -125,11 +124,6 @@ function configCanvas() {
     return new Canvas(scene, camera, render)
 }
 
-function configCar() {
-    let car = new Car(10, canvas.entities.curve.allPoints);
-    return car;
-}
-
 function configInputs() {
     document.onkeydown = function (evt) {
         canvas.keys[evt.key] = true;
@@ -147,17 +141,17 @@ function treatInputs() {
         car.moveRight();
 }
 
-function main() {
+function main() {    
+    var canvas = configCanvas();
+
     configInputs();
 
     let curve = createCurve(100);
     canvas.entities.curve = curve;
 
-    canvas.entities.car = configCar();
+    canvas.entities.car = new Car(10, canvas.entities.curve, 0.01);
 
     drawInitialPoints(curve.points);
 
     canvas.draw();
 }
-
-var canvas = configCanvas();
