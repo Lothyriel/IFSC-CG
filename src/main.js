@@ -1,6 +1,6 @@
 "use strict";
 class Canvas {
-    constructor(scene, camera, render, element) {
+    constructor(scene, camera, render) {
         this.scene = scene;
         this.camera = camera;
         this.render = render;
@@ -8,8 +8,12 @@ class Canvas {
         this.keys = {};
         this.up = new THREE.Vector3(1, 0, 0);
         this.started = false;
-        this.element = element;
         this.curveMainPoints = [];
+
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        this.plane = new THREE.Plane();
+        this.planeNormal = new THREE.Vector3();
     }
     draw() {
         this.render.render(this.scene, this.camera);
@@ -26,11 +30,11 @@ class Canvas {
 }
 
 class Car {
-    constructor(curve, step) {
+    constructor(curve, speed) {
         this.curve = curve;
         this.counter = 0;
         this.cube = this.createCube();
-        this.step = step;
+        this.speed = speed;
     }
     createCube() {
         let cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
@@ -59,18 +63,18 @@ class Car {
         this.cube.quaternion.setFromAxisAngle(axis, radians);
     }
     moveLeft() {
-        if (this.counter - this.step < 0)
+        if (this.counter - this.speed < 0)
             return;
 
-        this.move(-this.step);
+        this.move(-this.speed);
     }
     moveRight() {
-        if (this.counter + this.step > 1)
+        if (this.counter + this.speed > 1)
             return;
-        this.move(this.step);
+        this.move(this.speed);
     }
-    move(step) {
-        this.counter += step;
+    move(speed) {
+        this.counter += speed;
     }
 }
 
@@ -100,7 +104,7 @@ function renderPoint(vector3) {
 function configCanvas() {
     let scene = new THREE.Scene();
 
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
     camera.position.z = 5;
 
     let render = new THREE.WebGLRenderer();
@@ -111,7 +115,7 @@ function configCanvas() {
 
     let _ = new THREE.OrbitControls(camera, render.domElement);
 
-    return new Canvas(scene, camera, render, canvasElement);
+    return new Canvas(scene, camera, render);
 }
 
 function configInputs() {
@@ -144,10 +148,15 @@ function treatMouseClick(evt) {
     if (canvas.started)
         return;
 
-    let x = (evt.clientX / window.innerWidth) * 2 - 1;
-    let y = -(evt.clientY / window.innerHeight) * 2 + 1;
+    canvas.mouse.x = (evt.clientX / window.innerWidth) * 2 - 1;
+    canvas.mouse.y = -(evt.clientY / window.innerHeight) * 2 + 1;
 
-    let point = new THREE.Vector3(x, y, 0);
+    let point = new THREE.Vector3();
+
+    canvas.planeNormal.copy(canvas.camera.position).normalize();
+    canvas.plane.setFromNormalAndCoplanarPoint(canvas.planeNormal, canvas.scene.position);
+    canvas.raycaster.setFromCamera(canvas.mouse, canvas.camera);
+    canvas.raycaster.ray.intersectPlane(canvas.plane, point);
 
     canvas.curveMainPoints.push(point);
     canvas.scene.add(renderPoint(point));
@@ -160,16 +169,18 @@ function onWindowResize() {
 }
 
 function configEntities() {
+    if (canvas.started)
+        return;
+
     if (canvas.curveMainPoints.length < minCurvePoints) {
         console.log(`Menos de ${minCurvePoints} pontos iniciais`);
         return;
     }
-    if (canvas.started)
-        return;
+
     let curve = createCurve(curvePrecision, canvas.curveMainPoints);
     canvas.entities["curve"] = curve;
 
-    canvas.entities["car"] = new Car(curve, carStep);
+    canvas.entities["car"] = new Car(curve, carSpeed);
 
     drawInitialPoints(curve.points);
 
@@ -205,5 +216,5 @@ function main() {
 
 const minCurvePoints = 3;
 const curvePrecision = 200;
-const carStep = 0.01;
+const carSpeed = 0.01;
 var canvas = configCanvas();
