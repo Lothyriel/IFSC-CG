@@ -158,6 +158,7 @@ function treatMouseClick(evt) {
     canvas.raycaster.setFromCamera(canvas.mouse, canvas.camera);
     canvas.raycaster.ray.intersectPlane(canvas.plane, point);
 
+    point.z = 0;
     canvas.curveMainPoints.push(point);
     canvas.scene.add(renderPoint(point));
 }
