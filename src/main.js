@@ -181,7 +181,7 @@ function configEntities() {
     let curve = createCurve(curvePrecision, canvas.curveMainPoints);
     canvas.entities["curve"] = curve;
 
-    canvas.entities["car"] = new Car(curve, carSpeed);
+    canvas.entities["car"] = new Car(curve, 1 / (curve.points.length * 25));
 
     drawInitialPoints(curve.points);
 
@@ -217,5 +217,4 @@ function main() {
 
 const minCurvePoints = 3;
 const curvePrecision = 200;
-const carSpeed = 0.01;
 var canvas = configCanvas();
