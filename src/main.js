@@ -186,7 +186,7 @@ function configEntities() {
     drawLights();
 
     canvas.started = true;
-    let _ = new THREE.OrbitControls(camera, render.domElement);
+    let _ = new THREE.OrbitControls(canvas.camera, canvas.render.domElement);
 }
 
 function drawLights() {
