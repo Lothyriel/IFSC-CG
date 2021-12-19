@@ -113,8 +113,6 @@ function configCanvas() {
     let canvasElement = render.domElement;
     document.body.appendChild(canvasElement);
 
-    let _ = new THREE.OrbitControls(camera, render.domElement);
-
     return new Canvas(scene, camera, render);
 }
 
@@ -188,6 +186,7 @@ function configEntities() {
     drawLights();
 
     canvas.started = true;
+    let _ = new THREE.OrbitControls(camera, render.domElement);
 }
 
 function drawLights() {
