@@ -6,4 +6,4 @@
 
 --Control the cube with the Left and Right Arrows
 
---You can control the screen after the curve is drawn
+--You can control the camera with the mouse after the curve is drawn

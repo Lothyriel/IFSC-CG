@@ -216,7 +216,8 @@ function main() {
 function tutorial() {
     alert(`           Click on the screen and draw at least 2 points\n
            Press Enter to draw the curve\n
-           Control the cube with the Left and Right Arrows`)
+           Control the cube with the Left and Right Arrows\n
+           You can control the camera with the mouse after the curve is drawn`)
 }
 const minCurvePoints = 2;
 const curvePrecision = 200;
