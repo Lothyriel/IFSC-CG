@@ -14,6 +14,7 @@ class Canvas {
         this.mouse = new THREE.Vector2();
         this.plane = new THREE.Plane();
         this.planeNormal = new THREE.Vector3();
+        this.draw = this.draw.bind(this);
     }
     draw() {
         this.render.render(this.scene, this.camera);
@@ -25,16 +26,16 @@ class Canvas {
                 element.draw();
         });
 
-        requestAnimationFrame(this.draw.bind(this));
+        requestAnimationFrame(this.draw);
     }
 }
 
 class Car {
-    constructor(curve, speed) {
+    constructor(curve) {
         this.curve = curve;
         this.counter = 0;
         this.cube = this.createCube();
-        this.speed = speed;
+        this.speed = 0.02 / curve.points.length;
     }
     createCube() {
         let cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
@@ -170,7 +171,6 @@ function onWindowResize() {
 function configEntities() {
     if (canvas.started)
         return;
-
     if (canvas.curveMainPoints.length < minCurvePoints) {
         console.log(`Menos de ${minCurvePoints} pontos iniciais`);
         return;
@@ -178,15 +178,14 @@ function configEntities() {
 
     let curve = createCurve(curvePrecision, canvas.curveMainPoints);
     canvas.entities["curve"] = curve;
-
-    canvas.entities["car"] = new Car(curve, 1 / (curve.points.length * 25));
+    canvas.entities["car"] = new Car(curve);
 
     drawInitialPoints(curve.points);
 
     drawLights();
 
-    canvas.started = true;
     let _ = new THREE.OrbitControls(canvas.camera, canvas.render.domElement);
+    canvas.started = true;
 }
 
 function drawLights() {
@@ -212,8 +211,13 @@ function main() {
     configInputs();
 
     canvas.draw();
+    tutorial();
 }
-
-const minCurvePoints = 3;
+function tutorial() {
+    alert(`           Click on the screen and draw at least 2 points\n
+           Press Enter to draw the curve\n
+           Control the cube with the Left and Right Arrows`)
+}
+const minCurvePoints = 2;
 const curvePrecision = 200;
 var canvas = configCanvas();
