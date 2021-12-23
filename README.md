@@ -1,4 +1,4 @@
-# Trabalho-2-C.G.
+# Cube on a Spline.
 
 --Click on the screen and draw at least 2 points
 
