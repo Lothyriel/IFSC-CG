@@ -7,3 +7,5 @@
 --Control the cube with the Left and Right Arrows
 
 --You can control the camera with the mouse after the curve is drawn
+
+--Explicação: https://youtu.be/gro7w2xfhcA
