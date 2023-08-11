@@ -1,4 +1,4 @@
-# Cube on a Spline.
+# Spline Cube.
 3D Web Project using Three.js, where a red cube moves on a spline
 
 --Click on the screen and draw at least 2 points
