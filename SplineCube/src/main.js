@@ -46,8 +46,6 @@ class Car {
         return cube;
     }
     draw() {
-        console.log(`t: ${this.counter} | x: ${this.cube.position.x} y: ${this.cube.position.y}`);
-
         let point = this.curve.getPointAt(this.counter);
         this.cube.position.set(point.x, point.y, 0);
         this.adjustAngle();
